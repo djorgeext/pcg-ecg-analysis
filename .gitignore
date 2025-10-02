@@ -216,4 +216,4 @@ __marimo__/
 .streamlit/secrets.toml
 
 # Audio files
-git ls-files | grep -i '\.wav$'
+audios/*.wav
