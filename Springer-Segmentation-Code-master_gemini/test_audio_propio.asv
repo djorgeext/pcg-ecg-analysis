@@ -1,0 +1,61 @@
+%% 1. Configuración Inicial
+Fs_original = 1000; % Tu frecuencia de muestreo actual
+springer_options = default_Springer_HSMM_options;
+Fs_features = springer_options.audio_segmentation_Fs; % Por defecto es 50 Hz
+
+audio_train = load('/home/david/Documents/pcg-ecg-analysis/mediciones_simultaneas/DAVID171225_2-JORGE-20051201021025/pcg_cut_matlab.txt');
+r_peaks_train = load('/home/david/Documents/pcg-ecg-analysis/mediciones_simultaneas/DAVID171225_2-JORGE-20051201021025/R_marks_adjusted.txt');
+t_points_train = load('/home/david/Documents/pcg-ecg-analysis/mediciones_simultaneas/DAVID171225_2-JORGE-20051201021025/T_marks_adjusted.txt');
+
+
+%% 2. Preparación de Datos de ENTRENAMIENTO
+% El algoritmo espera Cell Arrays, incluso si es una sola grabación.
+% También espera que las anotaciones estén en la frecuencia de características (50 Hz).
+
+% Convertir anotaciones de 1000 Hz a 50 Hz
+% Multiplicamos por la razón (50/1000 = 0.05) y redondeamos
+r_peaks_train_50hz = round(double(r_peaks_train) * (Fs_features / Fs_original));
+t_points_train_50hz = round(double(t_points_train) * (Fs_features / Fs_original));
+
+% Asegurarse de que no haya índices 0 (MATLAB empieza en 1)
+r_peaks_train_50hz(r_peaks_train_50hz < 1) = 1;
+t_points_train_50hz(t_points_train_50hz < 1) = 1;
+
+% Crear las estructuras de entrada (Cell Arrays)
+% audio_train debe ser un vector columna o fila dentro de una celda
+train_recordings = {audio_train}; 
+
+% annotationsArray es una celda de N x 2
+% Columna 1: Picos R, Columna 2: Puntos T (ambos a 50Hz)
+train_annotations = cell(1, 2);
+train_annotations{1, 1} = r_peaks_train_50hz;
+train_annotations{1, 2} = t_points_train_50hz;
+
+%% 3. Entrenar el Algoritmo
+disp('Entrenando el algoritmo...');
+% Nota: Se pasa Fs_original (1000) porque el algoritmo necesita saber cómo bajar el audio,
+% pero usa las anotaciones ya convertidas a 50 Hz internamente.
+[B_matrix, pi_vector, total_obs_distribution] = trainSpringerSegmentationAlgorithm(...
+    train_recordings, ...
+    train_annotations, ...
+    Fs_original, ...
+    false); % false para no mostrar figuras durante el entrenamiento
+
+disp('Entrenamiento completado.');
+
+%% 4. Probar con Datos de TEST
+disp('Ejecutando en datos de test...');
+
+% Ejecutar el algoritmo en el audio de test
+% (Aquí no necesitamos las anotaciones de test para correrlo, solo el audio)
+assigned_states = runSpringerSegmentationAlgorithm(...
+    audio_test, ...
+    Fs_original, ...
+    B_matrix, ...
+    pi_vector, ...
+    total_obs_distribution, ...
+    true); % true para plotear el resultado final
+
+%% 5. (Opcional) Evaluar precisión si tienes las anotaciones de test
+% Para comparar, necesitarías convertir los 'assigned_states' (que están a 1000Hz)
+% a eventos discretos y compararlos con r_peaks_test (1000Hz).

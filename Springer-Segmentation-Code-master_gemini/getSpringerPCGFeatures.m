@@ -59,6 +59,8 @@ audio_data = butterworth_high_pass_filter(audio_data,2,25,Fs);
 %% Spike removal from the original paper:
 audio_data = schmidt_spike_removal(audio_data,Fs);
 
+
+
 %% Find the homomorphic envelope
 homomorphic_envelope = Homomorphic_Envelope_with_Hilbert(audio_data, Fs);
 % Downsample the envelope:
@@ -74,10 +76,29 @@ downsampled_hilbert_envelope = normalise_signal(downsampled_hilbert_envelope);
 
 %% Power spectral density feature:
 
+% psd = get_PSD_feature_Springer_HMM(audio_data, Fs, 40,60)';
+% psd = resample(psd, length(downsampled_homomorphic_envelope), length(psd));
+% psd = normalise_signal(psd);
+%% Power spectral density feature:
 psd = get_PSD_feature_Springer_HMM(audio_data, Fs, 40,60)';
-psd = resample(psd, length(downsampled_homomorphic_envelope), length(psd));
-psd = normalise_signal(psd);
 
+% CORRECCIÓN: Usar interp1 en lugar de resample para evitar desbordamiento de memoria
+len_target = length(downsampled_homomorphic_envelope);
+len_source = length(psd);
+
+% Crear vectores de referencia para la interpolación
+x_source = linspace(0, 1, len_source);
+x_target = linspace(0, 1, len_target);
+
+% Interpolar linealmente
+psd = interp1(x_source, psd, x_target, 'linear');
+
+% Asegurar que sea vector columna si es necesario (el código original espera eso)
+if size(psd,1) < size(psd,2)
+    psd = psd';
+end
+
+psd = normalise_signal(psd);
 %% Wavelet features:
 
 if(include_wavelet)
