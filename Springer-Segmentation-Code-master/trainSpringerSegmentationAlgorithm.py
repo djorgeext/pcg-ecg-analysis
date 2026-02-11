@@ -52,7 +52,7 @@ def trainSpringerSegmentationAlgorithm(pcg_audio_list, annotations_list, fs, fig
         s2_locations = annotations_list[i][1]
         
         # Get Features
-        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False)
+        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False, include_wavelet=True)
         
         # Label States
         # The first column of PCG_Features is the Homomorphic Envelope

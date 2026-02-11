@@ -30,7 +30,7 @@ def runSpringerSegmentationAlgorithm(audio_data, fs, b_matrix, pi_vector, total_
     
     # 1. Get Features
     # Note: getSpringerPCGFeatures returns features at features_fs (50Hz) and the fs
-    pcg_features, features_fs_extracted = getSpringerPCGFeatures(audio_data, fs)
+    pcg_features, features_fs_extracted = getSpringerPCGFeatures(audio_data, fs, include_wavelet=True)
     
     # Ensure usage of the extracted features_fs if needed, or consistency check
     # features_fs was already defined from options (50Hz).
