@@ -6,7 +6,6 @@ from getSpringerPCGFeatures import getSpringerPCGFeatures
 from getHeartRateSchmidt import getHeartRateSchmidt
 from viterbiDecodePCG_Springer import viterbiDecodePCG_Springer
 from expand_qt import expand_qt
-from default_Springer_HSMM_options import default_Springer_HSMM_options
 
 def runSpringerSegmentationAlgorithm(audio_data, fs, b_matrix, pi_vector, total_observation_distribution, figures=False):
     """
@@ -24,16 +23,9 @@ def runSpringerSegmentationAlgorithm(audio_data, fs, b_matrix, pi_vector, total_
     assigned_states: Array of state labels (1-4) at the original sampling frequency 'fs'
     """
     
-    # Options
-    springer_options = default_Springer_HSMM_options()
-    features_fs = springer_options.audio_segmentation_Fs
-    
     # 1. Get Features
-    # Note: getSpringerPCGFeatures returns features at features_fs (50Hz) and the fs
-    pcg_features, features_fs_extracted = getSpringerPCGFeatures(audio_data, fs, include_wavelet=True)
-    
-    # Ensure usage of the extracted features_fs if needed, or consistency check
-    # features_fs was already defined from options (50Hz).
+    # Keep default options from getSpringerPCGFeatures, matching MATLAB run function
+    pcg_features, features_fs = getSpringerPCGFeatures(audio_data, fs)
     
     # 2. Get Heart Rate
     heart_rate, systolic_time_interval = getHeartRateSchmidt(audio_data, fs)

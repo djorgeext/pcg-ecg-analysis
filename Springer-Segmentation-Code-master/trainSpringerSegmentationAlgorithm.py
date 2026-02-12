@@ -39,6 +39,7 @@ def trainSpringerSegmentationAlgorithm(pcg_audio_list, annotations_list, fs, fig
     
     number_of_states = 4
     num_pcgs = len(pcg_audio_list)
+    expected_feature_dim = 3
     
     # A matrix (list of lists) of the values from each state in each of the PCG recordings:
     # state_observation_values[rec_idx][state_idx]
@@ -48,11 +49,18 @@ def trainSpringerSegmentationAlgorithm(pcg_audio_list, annotations_list, fs, fig
         pcg_audio = pcg_audio_list[i]
         
         # Annotations
-        s1_locations = annotations_list[i][0]
-        s2_locations = annotations_list[i][1]
+        annotation_item = np.array(annotations_list[i])
+        if annotation_item.ndim == 2 and annotation_item.shape[1] >= 2:
+            s1_locations = annotation_item[:, 0]
+            s2_locations = annotation_item[:, 1]
+        else:
+            s1_locations = annotations_list[i][0]
+            s2_locations = annotations_list[i][1]
         
         # Get Features
-        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False, include_wavelet=True)
+        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False)
+        if pcg_features.ndim > 1 and pcg_features.shape[1] > 0:
+            expected_feature_dim = pcg_features.shape[1]
         
         # Label States
         # The first column of PCG_Features is the Homomorphic Envelope
@@ -82,7 +90,7 @@ def trainSpringerSegmentationAlgorithm(pcg_audio_list, annotations_list, fs, fig
             if np.any(mask):
                 state_observation_values[i][state_i - 1] = pcg_features[mask, :]
             else:
-                 state_observation_values[i][state_i - 1] = np.empty((0, pcg_features.shape[1]))
+                 state_observation_values[i][state_i - 1] = np.empty((0, expected_feature_dim))
 
     # Train the B and pi matrices after all the PCG recordings have been labelled:
     logistic_regression_B_matrix, pi_vector, total_obs_distribution = trainBandPiMatricesSpringer(state_observation_values)
