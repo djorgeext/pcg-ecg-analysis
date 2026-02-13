@@ -58,7 +58,7 @@ def trainSpringerSegmentationAlgorithm(pcg_audio_list, annotations_list, fs, fig
             s2_locations = annotations_list[i][1]
         
         # Get Features
-        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False)
+        pcg_features, features_fs = getSpringerPCGFeatures(pcg_audio, fs, figures=False, include_wavelet=True)
         if pcg_features.ndim > 1 and pcg_features.shape[1] > 0:
             expected_feature_dim = pcg_features.shape[1]
         

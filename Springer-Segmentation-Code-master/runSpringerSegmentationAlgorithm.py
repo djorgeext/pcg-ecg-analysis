@@ -25,7 +25,7 @@ def runSpringerSegmentationAlgorithm(audio_data, fs, b_matrix, pi_vector, total_
     
     # 1. Get Features
     # Keep default options from getSpringerPCGFeatures, matching MATLAB run function
-    pcg_features, features_fs = getSpringerPCGFeatures(audio_data, fs)
+    pcg_features, features_fs = getSpringerPCGFeatures(audio_data, fs, figures=False, include_wavelet=True)
     
     # 2. Get Heart Rate
     heart_rate, systolic_time_interval = getHeartRateSchmidt(audio_data, fs)
