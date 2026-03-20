@@ -221,3 +221,5 @@ mediciones_simultaneas/
 test-simultaneo/
 
 *.wav
+# Large local artifacts
+mediciones_simultaneas.zip
